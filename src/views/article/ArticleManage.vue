@@ -7,6 +7,7 @@ import { formatTime } from '@/utils/format'
 
 const articleList = ref([])
 const total = ref(0)
+const loading = ref(false)
 
 const params = ref({
   pagenum: 1,
@@ -24,9 +25,11 @@ const onDeleteArticle = (row) => {
 }
 
 const getArticleList = async () => {
+  loading.value = true
   const res = await artGetListService(params.value)
   articleList.value = res.data.data
   total.value = res.data.total
+  loading.value = false
 }
 getArticleList()
 
@@ -37,6 +40,18 @@ const onSizeChange = (size) => {
 }
 const onCurrentChange = (page) => {
   params.value.pagenum = page
+  getArticleList()
+}
+
+const onSearch = () => {
+  params.value.pagenum = 1
+  getArticleList()
+}
+
+const onReset = () => {
+  params.value.pagenum = 1
+  params.value.cate_id = ''
+  params.value.state = ''
   getArticleList()
 }
 </script>
@@ -58,12 +73,12 @@ const onCurrentChange = (page) => {
         </el-select>
       </el-form-item>
       <el-form-item label="">
-        <el-button type="primary">搜索</el-button>
-        <el-button>重置</el-button>
+        <el-button @click="onSearch" type="primary">搜索</el-button>
+        <el-button @click="onReset">重置</el-button>
       </el-form-item>
     </el-form>
     <!-- 表格区域 -->
-    <el-table :data="articleList" style="width: 100%">
+    <el-table :data="articleList" style="width: 100%" v-loading="loading">
       <el-table-column label="文章标题">
         <template #default="{ row }">
           <el-link type="primary" :underline="false">{{ row.title }}</el-link>
