@@ -14,3 +14,6 @@ export const artDelChannelService = (id) =>
       id
     }
   })
+
+export const artGetListService = (params) =>
+  request.get('/my/article/list', { params })

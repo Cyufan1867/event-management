@@ -2,30 +2,18 @@
 import { ref } from 'vue'
 import { Delete, Edit } from '@element-plus/icons-vue'
 import ChannelSelect from './components/ChannelSelect.vue'
+import { artGetListService } from '@/api/article'
+import { formatTime } from '@/utils/format'
 
-const articleList = ref([
-  {
-    id: 5961,
-    title: '心得文章',
-    pub_date: '2022-06-07',
-    state: '已发布',
-    cate_name: '新闻'
-  },
-  {
-    id: 5962,
-    title: '心得文章',
-    pub_date: '2022-06-07',
-    state: '草稿',
-    cate_name: '体育'
-  }
-])
+const articleList = ref([])
+const total = ref(0)
 
-const params = {
+const params = ref({
   pagenum: 1,
   pagesize: 5,
   cate_id: '',
   state: ''
-}
+})
 
 const onEditArticle = (row) => {
   console.log(row)
@@ -33,6 +21,23 @@ const onEditArticle = (row) => {
 
 const onDeleteArticle = (row) => {
   console.log(row)
+}
+
+const getArticleList = async () => {
+  const res = await artGetListService(params.value)
+  articleList.value = res.data.data
+  total.value = res.data.total
+}
+getArticleList()
+
+const onSizeChange = (size) => {
+  params.value.pagenum = 1
+  params.value.pagesize = size
+  getArticleList()
+}
+const onCurrentChange = (page) => {
+  params.value.pagenum = page
+  getArticleList()
 }
 </script>
 
@@ -57,6 +62,7 @@ const onDeleteArticle = (row) => {
         <el-button>重置</el-button>
       </el-form-item>
     </el-form>
+    <!-- 表格区域 -->
     <el-table :data="articleList" style="width: 100%">
       <el-table-column label="文章标题">
         <template #default="{ row }">
@@ -64,7 +70,11 @@ const onDeleteArticle = (row) => {
         </template>
       </el-table-column>
       <el-table-column label="分类" prop="cate_name"></el-table-column>
-      <el-table-column label="发表时间" prop="pub_date"></el-table-column>
+      <el-table-column label="发表时间" prop="pub_date">
+        <template #default="{ row }">
+          {{ formatTime(row.pub_date) }}
+        </template>
+      </el-table-column>
       <el-table-column label="状态" prop="state"></el-table-column>
       <el-table-column label="操作" width="100%">
         <template #default="{ row }">
@@ -88,6 +98,18 @@ const onDeleteArticle = (row) => {
         <el-empty description="没有数据"></el-empty>
       </template>
     </el-table>
+    <!-- 分页区域 -->
+    <el-pagination
+      v-model:current-page="params.pagenum"
+      v-model:page-size="params.pagesize"
+      :page-sizes="[2, 3, 4, 5, 10]"
+      layout="jumper, total, sizes, prev, pager, next"
+      background
+      :total="total"
+      @size-change="onSizeChange"
+      @current-change="onCurrentChange"
+      style="margin-top: 20px; justify-content: flex-end"
+    />
   </page-container>
 </template>
 
