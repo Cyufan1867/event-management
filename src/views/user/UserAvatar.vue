@@ -14,7 +14,7 @@ const onSelectFile = (uploadFile) => {
     imgUrl.value = reader.result
   }
 }
-
+// 上传头像
 const onUpdateAvatar = async () => {
   // 发送请求更新头像
   await userUpdateAvatarService(imgUrl.value)
